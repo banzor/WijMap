@@ -1,7 +1,7 @@
 ﻿<!doctype html>
 <html lang="en">
 <head>
-    <title>Menu - Overview</title>
+    <title>Wijmo + ESRI Map</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="description" content="%description%" />
@@ -37,11 +37,8 @@
             var zoomSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([20, 156, 255]), 1), new dojo.Color([141, 185, 219, 0.3]));
             esriConfig.defaults.map.zoomSymbol = zoomSymbol.toJson();
 
-            var initialExtent = new esri.geometry.Extent({ "xmin": 244598, "ymin": 6241389, "xmax": 278995, "ymax": 6264320, "spatialReference": { "wkid": 102100} });
+            var initialExtent = new esri.geometry.Extent({ "xmin": -8918366, "ymin": 4920346, "xmax": -8891613, "ymax": 4939455, "spatialReference": { "wkid": 102100} });
             map = new esri.Map("map", { extent: initialExtent, slider: false });
-
-
-
             // register for some map events
             dojo.connect(map, "onLoad", function () {
                 console.log("Map onLoad event");
@@ -188,7 +185,7 @@
     <div class="container">
         <div class="header">
             <h2>
-                Wijmo Map Demo</h2>
+                Wijmo + ESRI Map</h2>
         </div>
         <div class="main demo">
             <!-- Begin demo markup --><a id="tooltip" href="" title="Woot!"></a>
