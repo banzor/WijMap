@@ -1,0 +1,230 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <title>Roadtrip to jQuery Boston!</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="%description%" />
+    <meta name="keywords" content="" />
+    <meta name="author" content="ComponentOne" />
+    <link type="text/css" href="css/aristo/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+    <link href="css/jquery.wijmo-open.0.8.0.css" rel="stylesheet" type="text/css" />
+    <link href="css/jquery.wijmo-complete.0.8.0.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.bgiframe-2.1.1.js"></script>
+    <script type="text/javascript" src="js/jquery.glob.min.js"></script>
+    <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="js/raphael.js"></script>
+    <script type="text/javascript" src="js/raphael-popup.js"></script>
+    <script src="js/jquery.wijmo-open.0.8.0.min.js" type="text/javascript"></script>
+    <script src="js/jquery.wijmo-complete.0.8.0.min.js" type="text/javascript"></script>
+    <!-- ArcGIS API for JavaScript -->
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.1"></script>
+    <script type="text/javascript">
+        dojo.require("esri.map");
+        dojo.require("esri.tasks.locator");
+        dojo.require("esri.tasks.route");
+        dojo.require("esri.utils");
+
+        var map, locator, routeTask, routeParams, routes = [];
+        var fromSymbol, toSymbol, stopSymbol, routeSymbol, segmentSymbol;
+        var from, to, directions, directionFeatures, segmentGraphic;
+
+        function init() {
+            //esri.config.defaults.io.proxyUrl = "/proxy/proxy.ashx";
+           
+
+            map = new esri.Map("map", {
+                extent: new esri.geometry.Extent({ "xmin": -8918366, "ymin": 4920346, "xmax": -8891613, "ymax": 4939455, "spatialReference": { "wkid": 102100} })
+            });
+
+            map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"));
+
+            locator = new esri.tasks.Locator("http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA/GeocodeServer");
+            dojo.connect(locator, "onError", errorHandler);
+
+            routeTask = new esri.tasks.RouteTask("http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route");
+            routeParams = new esri.tasks.RouteParameters();
+            routeParams.stops = new esri.tasks.FeatureSet();
+            routeParams.returnRoutes = false;
+            routeParams.returnDirections = true;
+            routeParams.directionsLengthUnits = esri.Units.MILES;
+            routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
+
+            dojo.connect(routeTask, "onSolveComplete", showRoute);
+            dojo.connect(routeTask, "onError", errorHandler);
+
+            //Configure symbols to be used for destinations and route segments
+            fromSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([0, 255, 0]));
+            stopSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([0, 0, 255]));
+            toSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([255, 0, 0]));
+
+            routeSymbol = new esri.symbol.SimpleLineSymbol().setColor(new dojo.Color([0, 0, 255, 0.5])).setWidth(4);
+            segmentSymbol = new esri.symbol.SimpleLineSymbol().setColor(new dojo.Color([255, 0, 0, 0.5])).setWidth(8);
+
+            dojo.connect(map, "onLoad", function () {
+                console.log("Map onLoad event");
+
+                /*****************
+                * Hook up jQuery
+                *****************/
+                $(document).ready(jQueryReady);
+            });
+
+        }
+
+        function jQueryReady() {
+            console.log("jQuery ready event");
+            mapRoadtrip();
+        }
+
+        dojo.addOnLoad(init);
+
+        function mapRoadtrip() {
+            routeParams.stops.features = [];
+
+            fromAddress = { Address: "201 S Highland Ave", City: "Pittsburgh", State: "PA", Zip: "15206" };
+            locator.addressToLocations(fromAddress, ["Loc_name"], function (addressCandidates) {
+                addStop(addressCandidates, fromSymbol);
+            });
+            
+            pitstopAddress = { Address: "3840 William Penn Avenue", City: "Nanty-Glo", State: "PA", Zip: "15943" };
+            locator.addressToLocations(pitstopAddress, ["Loc_name"], function (addressCandidates) {
+                addStop(addressCandidates, stopSymbol);
+            });
+
+            toAddress = { Address: "1 Hotel Drive", City: "Boston", State: "MA", Zip: "02128" };
+            locator.addressToLocations(toAddress, ["Loc_name"], function (addressCandidates) {
+                addStop(addressCandidates, toSymbol);
+            });
+
+            //routeTask.solve(routeParams);
+        }
+
+        function addStop(addressCandidates, markerSymbol) {
+            var stop = null, score = 0;
+
+            //Get the address match with the top score
+            stop = addressCandidates[0];
+            score = addressCandidates[0].score;
+
+            //convert the locations to web mercator to display on map
+            var location = esri.geometry.geographicToWebMercator(stop.location);
+
+            //Set the best address match as a stop on the route
+            routeParams.stops.features.push(map.graphics.add(new esri.Graphic(location, markerSymbol, { address: stop.address, score: stop.score })));
+           
+            if (routeParams.stops.features.length === 3) {
+                routeTask.solve(routeParams);
+            }
+        }
+
+        function showRoute(solveResult) {
+            directions = solveResult.routeResults[0].directions;
+            directionFeatures = directions.features;
+
+            //Add route to the map
+            map.graphics.add(new esri.Graphic(directions.mergedGeometry, routeSymbol));
+
+            //Display the total time and distance of the route
+            dojo.byId("summary").innerHTML = "<br /> &nbsp; Total distance: " + formatDistance(directions.totalLength, "miles") + "<br /> &nbsp; Total time: " + formatTime(directions.totalTime);
+
+            //List the directions and create hyperlinks for each route segment
+            var dirStrings = ["<ol>"];
+            dojo.forEach(solveResult.routeResults[0].directions.features, function (feature, i) {
+                dirStrings.push("<li onclick='zoomToSegment(" + i + "); return false;' class=\"segment\"><a href=\"#\">" + feature.attributes.text + " (" + formatDistance(feature.attributes.length, "miles") + ", " + formatTime(feature.attributes.time) + ")</a></li>");
+            });
+            dirStrings.push("</ol>");
+            dojo.byId("directions").innerHTML = dirStrings.join("");
+
+            zoomToFullRoute();
+        }
+
+        //Display any errors that were caught when attempting to solve the rotue
+        function errorHandler(err) {
+            alert("An error occured\n" + err.message + "\n" + err.details.join("\n"));
+        }
+
+        //Zoom to the appropriate segment when the user clicks a hyperlink in the directions list
+        function zoomToSegment(index) {
+            var segment = directionFeatures[index];
+            map.setExtent(segment.geometry.getExtent(), true);
+            if (!segmentGraphic) {
+                segmentGraphic = map.graphics.add(new esri.Graphic(segment.geometry, segmentSymbol));
+            }
+            else {
+                segmentGraphic.setGeometry(segment.geometry);
+            }
+        }
+
+        function zoomToFullRoute() {
+            map.graphics.remove(segmentGraphic);
+            segmentGraphic = null;
+            map.setExtent(directions.extent, true);
+        }
+
+        //Format the time as hours and minutes
+        function formatTime(time) {
+            var hr = Math.floor(time / 60), //Important to use math.floor with hours
+            min = Math.round(time % 60);
+
+            if (hr < 1 && min < 1) {
+                return "";
+            }
+            else if (hr < 1) {
+                return min + " minute(s)";
+            }
+
+            return hr + " hour(s) " + min + " minute(s)";
+        }
+
+        //Round the distance to the nearest hundredth of a unit
+        function formatDistance(dist, units) {
+            var d = Math.round(dist * 100) / 100;
+            if (d === 0) {
+                return "";
+            }
+
+            return d + " " + units;
+        }
+    </script>
+    <style type="text/css">
+        /*demo page css*/
+        body
+        {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="demo-single">
+    <div class="container">
+        <div class="header">
+            <h2>
+                Roadtrip to jQuery Conference</h2>
+        </div>
+        <div class="main demo">
+            <!-- Begin demo markup -->
+            
+            <div id="info" class="ui-widget-header ui-corner-all" style="width: 690px; text-align: center; padding: 5px; color: black;">
+                <div id="summary" onclick="zoomToFullRoute();" class="segment">
+                </div>
+                <div id="directions">
+                </div>
+            </div>
+            <p>
+                Click on the map to get location details.</p>
+            <!-- Div that will be used to render jQuery Dialog -->
+            <div id="dialog">
+            </div>
+            <!-- End demo markup -->
+            <div class="demo-options">
+                <!-- Begin options markup -->
+                <!-- End options markup -->
+            </div>
+        </div>
+        <div class="footer demo-description">
+        </div>
+    </div>
+</body>
+</html>
