@@ -40,8 +40,11 @@
 
 
             map = new esri.Map("map", {
+                slider: false,
                 extent: new esri.geometry.Extent({ "xmin": -8918366, "ymin": 4920346, "xmax": -8891613, "ymax": 4939455, "spatialReference": { "wkid": 102100} })
             });
+
+
 
             map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"));
 
@@ -60,12 +63,11 @@
             dojo.connect(routeTask, "onError", errorHandler);
 
             //Configure symbols to be used for destinations and route segments
-            fromSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([0, 255, 0]));
-            stopSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([0, 0, 255]));
-            toSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color([255, 0, 0]));
+            wijmoSymbol = new esri.symbol.PictureMarkerSymbol('img/wijmo.png', 50, 50);
+            hatemoSymbol = new esri.symbol.PictureMarkerSymbol('img/hatemo.png', 50, 50);
 
-            routeSymbol = new esri.symbol.SimpleLineSymbol().setColor(new dojo.Color([0, 0, 255, 0.5])).setWidth(4);
-            segmentSymbol = new esri.symbol.SimpleLineSymbol().setColor(new dojo.Color([255, 0, 0, 0.5])).setWidth(8);
+            routeSymbol = new esri.symbol.SimpleLineSymbol().setColor("#00a6dd").setWidth(4);
+            segmentSymbol = new esri.symbol.SimpleLineSymbol().setColor("#8ede43").setWidth(8);
 
             dojo.connect(map, "onLoad", function () {
                 console.log("Map onLoad event");
@@ -90,14 +92,22 @@
 
         function jQueryReady() {
             console.log("jQuery ready event");
-            $("#quicknav").wijmenu({ orientation: "horizontal" });
-            $("#tipper").wijtooltip().wijtooltip("show");
-            $("#toggleNav").button().toggle(function () {
-                $("#directions").show();
-                $(this).find("span").text("Hide Directions");
-            }, function () {
-                $("#directions").hide();
-                $(this).find("span").text("Show Directions");
+            $("#tipper").wijtooltip({ showCallOut: false }).wijtooltip("show");
+            $("#quicknav a").wijtooltip({ showCallOut: false });
+            $("#accrd").wijaccordion({ header: "h3", requireOpenedPane: false });
+
+            $("#jqSlider").wijslider({
+                min: 0,
+                max: 17,
+                value: map.getLevel(),
+                orientation: "vertical",
+
+                change: function (event, ui) {
+                    map.setLevel(ui.value);
+                }
+            });
+            dojo.connect(map, "onZoomEnd", function (evt) {
+                $("#jqSlider").wijslider("value", map.getLevel());
             });
             mapRoadtrip();
         }
@@ -109,22 +119,22 @@
 
             fromAddress = { Address: "201 S Highland Ave", City: "Pittsburgh", State: "PA", Zip: "15206" };
             locator.addressToLocations(fromAddress, ["Loc_name"], function (addressCandidates) {
-                addStop(addressCandidates, fromSymbol);
+                addStop(addressCandidates, wijmoSymbol);
             });
 
             pitstopAddress = { Address: "3840 William Penn Avenue", City: "Nanty-Glo", State: "PA", Zip: "15943" };
             locator.addressToLocations(pitstopAddress, ["Loc_name"], function (addressCandidates) {
-                addStop(addressCandidates, stopSymbol);
+                addStop(addressCandidates, wijmoSymbol);
             });
 
             hotelAddress = { Address: "1 Top of the 80s Road", City: "Hazleton", State: "PA", Zip: "18202" };
             locator.addressToLocations(hotelAddress, ["Loc_name"], function (addressCandidates) {
-                addStop(addressCandidates, stopSymbol);
+                addStop(addressCandidates, wijmoSymbol);
             });
 
             toAddress = { Address: "1 Hotel Drive", City: "Boston", State: "MA", Zip: "02128" };
             locator.addressToLocations(toAddress, ["Loc_name"], function (addressCandidates) {
-                addStop(addressCandidates, toSymbol);
+                addStop(addressCandidates, wijmoSymbol);
             });
 
             //routeTask.solve(routeParams);
@@ -158,14 +168,13 @@
 
             //List the directions and create hyperlinks for each route segment
             var dirStrings = ["<ul id='nav'>"];
-            dirStrings.push("<li onclick='zoomToFullRoute();return false;' class=\"segment\"><h3>Total distance: " + formatDistance(directions.totalLength, "miles") + " Total time: " + formatTime(directions.totalTime) + "</h3></li>");
+            dirStrings.push("<li onclick='zoomToFullRoute();return false;' class=\"segment\"><h4>Total distance: " + formatDistance(directions.totalLength, "miles") + " Total time: " + formatTime(directions.totalTime) + "</h4></li>");
             dojo.forEach(solveResult.routeResults[0].directions.features, function (feature, i) {
                 dirStrings.push("<li onclick='zoomToSegment(" + i + "); return false;' class=\"segment\"><a href=\"#\">" + feature.attributes.text + " (" + formatDistance(feature.attributes.length, "miles") + ", " + formatTime(feature.attributes.time) + ")</a></li>");
             });
             dirStrings.push("</ul>");
             dojo.byId("directions").innerHTML = dirStrings.join("");
             $("#nav").wijmenu({ orientation: "vertical" });
-            $("#actions").show();
             $("#tipper").wijtooltip("hide");
             zoomToFullRoute();
         }
@@ -252,41 +261,55 @@
         {
             font-size: 12px;
         }
+        a img
+        {
+            border: none;
+        }
         .ui-wijmenu
         {
             width: auto;
         }
-        a img
+        .dirs
         {
-            border:none;
+            height: 400px;
+            overflow: auto;
         }
     </style>
 </head>
 <body class="demo-single">
     <div style="font-size: 10px; width: 400px; position: absolute; top: 10px; right: 10px; z-index: 99">
-        <ul id="quicknav">
-            <li>
+        <div id="accrd">
+            <div>
                 <h3>
-                    Jump to a stop on our trip!</h3>
-            </li>
-            <li><a href="#" onclick="zoomToStart();return false;"><img alt="" src="img/wijmohq.jpg" /></a></li>
-            <li><a href="#" onclick="zoomToPitStop();return false;"><img alt="" src="img/pitstop.jpg" /></a></li>
-            <li><a href="#" onclick="zoomToHotel();return false;"><img alt="" src="img/hotel.jpg" /></a></li>
-            <li><a href="#" onclick="zoomToEnd();return false;"><img alt="" src="img/jqcon.jpg" /></a></li>
-            <li><a href="#" onclick="zoomToFullRoute();return false;"><img alt="" src="img/reset.jpg" /></a></li>
-        </ul>
-        <div id="directions" class="ui-helper-hidden" style="font-size: 10px; width: 400px; height: 400px; overflow: auto; margin: .3em 0">
-        </div>
-        <div id="actions" class="ui-widget ui-widget-content ui-corner-all ui-helper-hidden" style="padding: .3em; margin: .3em 0">
-            <button id="toggleNav">
-                Show Directions</button>
+                    Quick Nav</h3>
+                <div id="quicknav">
+                    <a href="#" title="Wijmo HQ" onclick="zoomToStart();return false;">
+                        <img alt="" src="img/wijmohq.jpg" /></a> <a href="#" title="Pit Stop BBQ" onclick="zoomToPitStop();return false;">
+                            <img alt="" src="img/pitstop.jpg" /></a> <a href="#" title="Hotel" onclick="zoomToHotel();return false;">
+                                <img alt="" src="img/hotel.jpg" /></a> <a href="#" title="jQuery Conference" onclick="zoomToEnd();return false;">
+                                    <img alt="" src="img/jqcon.jpg" /></a> <a href="#" title="Full trip" onclick="zoomToFullRoute();return false;">
+                                        <img alt="" src="img/reset.jpg" /></a>
+                </div>
+            </div>
+            <div>
+                <h3>
+                    Directions</h3>
+                <div class="dirs">
+                    <div id="directions" class="" style="font-size: 10px; margin: .3em 0;">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div dojotype="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%; margin: 0;">
         <div id="map" dojotype="dijit.layout.ContentPane" region="center" style="overflow: hidden;">
+            <div style="position: absolute; left: 20px; top: 20px; z-index: 100;">
+                <div id="jqSlider" style="height: 200px">
+                </div>
+            </div>
         </div>
     </div>
-    <div id="working" style="position: absolute; bottom: 0; left: 10px; z-index: 99; ">
+    <div id="working" style="position: absolute; bottom: 0; left: 10px; z-index: 99;">
         <a id="tipper" href="#" title="Hardcore Mapping Action...">&nbsp;</a>
     </div>
 </body>
