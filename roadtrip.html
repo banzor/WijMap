@@ -94,6 +94,11 @@
                 addStop(addressCandidates, stopSymbol);
             });
 
+            hotelAddress = { Address: "1 Top of the 80s Road", City: "Hazleton", State: "PA", Zip: "18202" };
+            locator.addressToLocations(hotelAddress, ["Loc_name"], function (addressCandidates) {
+                addStop(addressCandidates, stopSymbol);
+            });
+
             toAddress = { Address: "1 Hotel Drive", City: "Boston", State: "MA", Zip: "02128" };
             locator.addressToLocations(toAddress, ["Loc_name"], function (addressCandidates) {
                 addStop(addressCandidates, toSymbol);
@@ -115,7 +120,7 @@
             //Set the best address match as a stop on the route
             routeParams.stops.features.push(map.graphics.add(new esri.Graphic(location, markerSymbol, { address: stop.address, score: stop.score })));
            
-            if (routeParams.stops.features.length === 3) {
+            if (routeParams.stops.features.length === 4) {
                 routeTask.solve(routeParams);
             }
         }
@@ -131,13 +136,13 @@
             dojo.byId("summary").innerHTML = "<br /> &nbsp; Total distance: " + formatDistance(directions.totalLength, "miles") + "<br /> &nbsp; Total time: " + formatTime(directions.totalTime);
 
             //List the directions and create hyperlinks for each route segment
-            var dirStrings = ["<ol>"];
+            var dirStrings = ["<ul id='nav'>"];
             dojo.forEach(solveResult.routeResults[0].directions.features, function (feature, i) {
                 dirStrings.push("<li onclick='zoomToSegment(" + i + "); return false;' class=\"segment\"><a href=\"#\">" + feature.attributes.text + " (" + formatDistance(feature.attributes.length, "miles") + ", " + formatTime(feature.attributes.time) + ")</a></li>");
             });
-            dirStrings.push("</ol>");
+            dirStrings.push("</ul>");
             dojo.byId("directions").innerHTML = dirStrings.join("");
-
+            $("#nav").wijmenu({ orientation: "vertical" });
             zoomToFullRoute();
         }
 
@@ -195,6 +200,10 @@
         {
             font-size: 12px;
         }
+        .ui-wijmenu
+        {
+            width:700px;
+        }
     </style>
 </head>
 <body class="demo-single">
@@ -205,8 +214,9 @@
         </div>
         <div class="main demo">
             <!-- Begin demo markup -->
-            
-            <div id="info" class="ui-widget-header ui-corner-all" style="width: 690px; text-align: center; padding: 5px; color: black;">
+            <div id="map" class="ui-widget ui-widget-content ui-corner-all" style="position: relative; width: 700px; height: 500px;">
+            </div>
+            <div id="info" class="">
                 <div id="summary" onclick="zoomToFullRoute();" class="segment">
                 </div>
                 <div id="directions">
