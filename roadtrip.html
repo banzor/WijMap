@@ -44,8 +44,6 @@
                 extent: new esri.geometry.Extent({ "xmin": -8918366, "ymin": 4920346, "xmax": -8891613, "ymax": 4939455, "spatialReference": { "wkid": 102100} })
             });
 
-
-
             map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"));
 
             locator = new esri.tasks.Locator("http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA/GeocodeServer");
@@ -95,7 +93,21 @@
             $("#tipper").wijtooltip({ showCallOut: false }).wijtooltip("show");
             $("#quicknav a").wijtooltip({ showCallOut: false });
             $("#accrd").wijaccordion({ header: "h3", requireOpenedPane: false });
-
+            $("#graphics").wijsuperpanel({
+                hScroller: {
+                    scrollMode: 'buttons'
+                },
+                vScroller: {
+                    scrollMode: 'none'
+                }
+            });
+            $("#picviewer").wijdialog({ autoOpen: false, width: 830, height: 650, title: "Roadtrip Photo" });
+            $("#graphics a").click(function () {
+                var pic = $(this).attr("href");
+                $("#picviewer img").attr("src", pic);
+                $("#picviewer").wijdialog("open");
+                return false;
+            });
             $("#jqSlider").wijslider({
                 min: 0,
                 max: 17,
@@ -109,7 +121,9 @@
             dojo.connect(map, "onZoomEnd", function (evt) {
                 $("#jqSlider").wijslider("value", map.getLevel());
             });
+
             mapRoadtrip();
+
         }
 
         dojo.addOnLoad(init);
@@ -200,22 +214,31 @@
             map.graphics.remove(segmentGraphic);
             segmentGraphic = null;
             map.setExtent(directions.extent, true);
+            $("#graphics a").show();
         }
 
         function zoomToStart() {
-            map.setExtent(new esri.geometry.Extent({ "xmin": -8898032, "ymin": 4932763, "xmax": -8896371, "ymax": 4933439, "spatialReference": { "wkid": 102100} }), true);
+            map.setExtent(new esri.geometry.Extent({ "xmin": -8900626, "ymin": 4932911, "xmax": -8896371, "ymax": 4935438, "spatialReference": { "wkid": 102100} }), true);
+            $("#graphics a").hide();
+            $("#graphics a.wijmohq").show();
         }
 
         function zoomToPitStop() {
-            map.setExtent(new esri.geometry.Extent({ "xmin": -8777918, "ymin": 4932625, "xmax": -8774595, "ymax": 4933977, "spatialReference": { "wkid": 102100} }), true);
+            map.setExtent(new esri.geometry.Extent({ "xmin": -8779543, "ymin": 4932782, "xmax": -8772683, "ymax": 4935477, "spatialReference": { "wkid": 102100} }), true);
+            $("#graphics a").hide();
+            $("#graphics a.pitstop").show();
         }
 
         function zoomToHotel() {
             map.setExtent(new esri.geometry.Extent({ "xmin": -8469653, "ymin": 5006351, "xmax": -8456363, "ymax": 5011759, "spatialReference": { "wkid": 102100} }), true);
+            $("#graphics a").hide();
+            $("#graphics a.hotel").show();
         }
 
         function zoomToEnd() {
             map.setExtent(new esri.geometry.Extent({ "xmin": -7922066, "ymin": 5213359, "xmax": -7895485, "ymax": 5224175, "spatialReference": { "wkid": 102100} }), true);
+            $("#graphics a").hide();
+            $("#graphics a.jqcon").show();
         }
 
         //Format the time as hours and minutes
@@ -274,6 +297,34 @@
             height: 400px;
             overflow: auto;
         }
+        .header
+        {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            z-index: 98;
+            background: #000;
+            background: rgba(0,0,0,0.35);
+            padding: 5px;
+            -moz-border-radius: 3px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+        }
+        .header h1
+        {
+            color: #fff;
+            text-shadow: 0px 1px 5px rgba(0,0,0,1);
+            font-weight: 800;
+            font-size: 3em;
+            margin: 0;
+            padding: 0;
+        }
+        #graphics a
+        {
+            display:block;
+            float:left;
+            padding:0 2px;
+        }
     </style>
 </head>
 <body class="demo-single">
@@ -309,8 +360,74 @@
             </div>
         </div>
     </div>
+    <div id="picviewer" class="ui-helper-hidden">
+        <img />
+    </div>
+    <div id="graphics" style="position: absolute; overflow:hidden; bottom: 40px; left: 50%; width: 600px; margin-left: -300px; height: 100px; z-index: 98;">
+        <div style="width: 2600px">
+            <a href="img/roadtrip/177305610.JPG" class="wijmohq">
+                <img alt="" src="img/roadtrip/177305610.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_1611.JPG" class="wijmohq">
+                    <img alt="" src="img/roadtrip/IMG_1611.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_0099.JPG" class="pitstop">
+                        <img alt="" src="img/roadtrip/IMG_0099.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_0101.JPG" class="pitstop">
+                            <img alt="" src="img/roadtrip/IMG_0101.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_1540.JPG" class="pitstop">
+                                <img alt="" src="img/roadtrip/IMG_1540.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_1542.JPG" class="pitstop">
+                                    <img alt="" src="img/roadtrip/IMG_1542.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_0744.JPG" class="hotel">
+                                        <img alt="" src="img/roadtrip/IMG_0744.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_1560.JPG" class="jqcon">
+                                            <img alt="" src="img/roadtrip/IMG_1560.JPG" height="100px" /></a> <a href="img/roadtrip/IMG_1563.JPG" class="jqcon">
+                                                <img alt="" src="img/roadtrip/IMG_1563.JPG" height="100px" /></a> 
+                                                                                <a href="img/roadtrip/IMG_1549.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1549.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1557.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1557.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1581.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1581.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1585.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1585.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0142.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0142.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0756.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0756.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0160.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0160.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0178.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0178.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0758.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0758.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0759.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0759.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1590.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1590.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1593.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1593.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0191.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0191.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_1603.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_1603.JPG" height="100px" />
+                                                                                </a>
+                                                                                <a href="img/roadtrip/IMG_0607.JPG" class="jqcon">
+                                                                                    <img alt="" src="img/roadtrip/IMG_0607.JPG" height="100px" />
+                                                                                </a>
+        </div>
+    </div>
     <div id="working" style="position: absolute; bottom: 0; left: 10px; z-index: 99;">
         <a id="tipper" href="#" title="Hardcore mapping action...">&nbsp;</a>
+    </div>
+    <div class="ui-widget header">
+        <h1>
+            Roadtrip to jQCon</h1>
     </div>
 </body>
 </html>
