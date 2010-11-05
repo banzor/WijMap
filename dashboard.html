@@ -39,7 +39,7 @@
         function init() {
             map = new esri.Map("map", {
                 slider: false,
-                extent: new esri.geometry.Extent({ "xmin": -8918366, "ymin": 4920346, "xmax": -8891613, "ymax": 4939455, "spatialReference": { "wkid": 102100} })
+                extent: new esri.geometry.Extent({ "xmin": -8276294, "ymin": 4953481, "xmax": -8196571, "ymax": 4999114, "spatialReference": { "wkid": 102100} })
             });
 
             map.addLayer(new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"));
@@ -82,6 +82,8 @@
         function jQueryReady() {
             console.log("jQuery ready event");
 
+            $("#tipper").wijtooltip({ showCallOut: false }).wijtooltip("show");
+
             $("#jqSlider").wijslider({
                 min: 0,
                 max: 17,
@@ -98,11 +100,13 @@
         }
 
         function doQuery(evt) {
+            $("#tipper").wijtooltip("option", "content", "Hardcore mapping action...").wijtooltip("show");
             click = query.geometry = evt.mapPoint;
             queryTask.execute(query);
         }
 
         function getChart(featureSet) {
+            
             var duration = 500;
             var radiusOffset = 18;
             var offset = {};
@@ -114,7 +118,7 @@
                 attributes = feature.attributes;
 
                 if (clicks > 0) {
-                    $("#chart").wijpiechart("destroy");
+                    $("#chart").html("").wijpiechart("destroy");
                 }
                 $("#chart").wijpiechart({
                     radius: 140,
@@ -192,8 +196,8 @@
                 feature.setSymbol(mySymbol);
                 map.graphics.add(feature);
                 clicks = 1;
-                $("#chart").show();
             }
+            $("#tipper").wijtooltip("hide");
         }
 
         dojo.addOnLoad(init);
@@ -245,6 +249,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="working" style="position: absolute; top: 0; right: 10px; z-index: 99;">
+        <a id="tipper" href="#" title="Click the map to see demographics for a county!">&nbsp;</a>
     </div>
 </body>
 </html>
