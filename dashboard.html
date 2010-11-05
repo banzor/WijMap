@@ -113,7 +113,9 @@
                 feature = features[i];
                 attributes = feature.attributes;
 
-                //$("#chart").wijpiechart("destroy");
+                if (clicks > 0) {
+                    $("#chart").wijpiechart("destroy");
+                }
                 $("#chart").wijpiechart({
                     radius: 140,
                     legend: { visible: true },
