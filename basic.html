@@ -7,20 +7,22 @@
     <meta name="description" content="%description%" />
     <meta name="keywords" content="" />
     <meta name="author" content="ComponentOne" />
-   <link type="text/css" href="css/aristo/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
-    <link href="css/jquery.wijmo-open.0.8.0.css" rel="stylesheet" type="text/css" />
-    <link href="css/jquery.wijmo-complete.0.8.0.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
-    <script type="text/javascript" src="js/jquery.bgiframe-2.1.1.js"></script>
-    <script type="text/javascript" src="js/jquery.glob.min.js"></script>
-    <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script>
-    <script type="text/javascript" src="js/raphael.js"></script>
-    <script type="text/javascript" src="js/raphael-popup.js"></script>
-    <script src="js/jquery.wijmo-open.0.8.0.min.js" type="text/javascript"></script>
-    <script src="js/jquery.wijmo-complete.0.8.0.min.js" type="text/javascript"></script>
+    <link type="text/css" href="css/aristo/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+    <link href="http://cdn.wijmo.com/themes/aristo/jquery-ui-1.8.4.custom.css" rel="stylesheet" type="text/css" />
+    <link href="http://cdn.wijmo.com/jquery.wijmo-open.0.8.2.css" rel="stylesheet" type="text/css" />
+    <link href="http://cdn.wijmo.com/jquery.wijmo-complete.0.8.2.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.1/js/dojo/dijit/themes/claro/claro.css">
+    <script type="text/javascript" src="http://ajax.microsoft.com/ajax/jquery/jquery-1.4.3.min.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.6/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://cdn.wijmo.com/external/jquery.tmpl.min.js"></script>
+    <script type="text/javascript" src="http://cdn.wijmo.com/external/jquery.bgiframe-2.1.1.js"></script>
+    <script type="text/javascript" src="http://cdn.wijmo.com/external/jquery.glob.min.js"></script>
+    <script type="text/javascript" src="http://cdn.wijmo.com/external/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="http://cdn.wijmo.com/external/raphael.js"></script>
+    <script src="http://cdn.wijmo.com/jquery.wijmo-open.0.8.2.min.js" type="text/javascript"></script>
+    <script src="http://cdn.wijmo.com/jquery.wijmo-complete.0.8.2.min.js" type="text/javascript"></script>
     <!-- ArcGIS API for JavaScript -->
-    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.1compact"></script>
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.1"></script>
     <script type="text/javascript">
         /*************
         * Dojo stuff
@@ -173,11 +175,11 @@
         }
       
     </script>
-        <style type="text/css">
+    <style type="text/css">
         /*demo page css*/
         body
         {
-            font-size: 12px;    
+            font-size: 12px;
         }
     </style>
 </head>
@@ -188,7 +190,8 @@
                 Wijmo + ESRI Map</h2>
         </div>
         <div class="main demo">
-            <!-- Begin demo markup --><a id="tooltip" href="" title="Woot!"></a>
+            <!-- Begin demo markup -->
+            <a id="tooltip" href="" title="Woot!"></a>
             <div id="map" class="ui-widget ui-widget-content ui-corner-all" style="position: relative; width: 700px; height: 500px;">
                 <div id="toolbar" style="position: absolute; left: 5px; top: 5px; z-index: 100;">
                     <ul id="flyoutmenu">
